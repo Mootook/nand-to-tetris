@@ -18,5 +18,11 @@ CHIP Mux8Way16 {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+      // effectively compressing the IN into two distinct halves
+      // differin in their leading bit.
+      // internally they differ  on the trailing bits of sel
+      // which can be resolved thorugh Mux4Way16
+      Mux4Way16(a=a, b=b, c=c, d=d, sel=sel[0..1], out=adOut);
+      Mux4Way16(a=e, b=f, c=g, d=h, sel=sel[0..1], out=ehOut);
+      Mux16(a=adOut, b=ehOut, sel=sel[2], out=out);
 }

@@ -16,5 +16,27 @@ CHIP DMux4Way {
     OUT a, b, c, d;
 
     PARTS:
-    // Put your code here:
+    // sel = 01
+    // in = 1
+    // sel = 0
+    DMux(in=in, sel=sel[1], a=m1, b=m2);
+    // {1, 0}
+    // m1=1
+    // sel=1
+    DMux(in=m1, sel=sel[0], a=a, b=b);
+    // a=0
+    // b=1
+
+    // m2=0
+    // sel=1
+    DMux(in=m2, sel=sel[0], a=c, b=d);
+    // {0, 0}
+    // c=0
+    // d=0
+
+    /**
+     * This on took me a while to understand, but it works by 
+     * sort of disregaring half of the operation by using the first
+     * DMux gate.
+     */
 }
