@@ -1,2 +1,5 @@
 tools/
 readings/
+
+*.dat
+*.out
