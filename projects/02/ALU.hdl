@@ -43,7 +43,7 @@ CHIP ALU {
         ng; // 1 if (out < 0),  0 otherwise
 
     PARTS:
-    // Prepare the x and y values
+      // Prepare the x and y values
       // if zx then x = 0
         // zx
         // Mux for this?
@@ -62,24 +62,36 @@ CHIP ALU {
       Not16(in=zyy, out=noty);
       Mux16(a=zyy, b=noty, sel=ny, out=outy);
 
-    // Prepare f
+      // Prepare f
       // Process both options and feed into another mux
-      // Add16(a=x, b=y, out=addout)
-      // And16(a=x, b=y, out=andout)
-      // Mux(a=andout, b=andout, sel=f, out=out);
       Add16(a=outx, b=outy, out=addxy);
       And16(a=outx, b=outy, out=andxy);
       Mux16(a=andxy, b=addxy, sel=f, out=outf);
 
-    // Prepare no
+      // Prepare no
       Not16(in=outf, out=notoutf);
-      Mux16(a=outf, b=notoutf, sel=no, out=out);
-      // Not(in=out, out=notout)
-      // Mux(a=out, b=notout, sel=no, out=fout)
+      // Final out
+      // Creating multiple outputs from 
+      Mux16(a=outf, b=notoutf, sel=no, out[0..7]=fhalfout, out[8..15]=shalfout, out[15]=msb, out=out);
 
-    // Prepare zr / ng
-      // 
+      // Prepare zr / ng
+        // zr
+        // if (out == 0) set zr = 1
+          // Need a way to base this off of a 16 bit input
+          // minimize input to one as "out"
+        
 
+      // these names are getting messy... o first half out, o second half out
+      Or8Way(in=fhalfout, out=ofhalfout);
+      Or8Way(in=shalfout, out=oshalfout);
 
-   // Put you code here:
+      Or(a=ofhalfout, b=oshalfout, out=outisone);
+      Mux(a=true, b=false, sel=outisone, out=zr);
+
+      // ng 
+      // if (out < 0) set ng = 1
+      // need to look at MSB (most significant bit)
+      // if it's one, out < 0 
+      Mux(a=false, b=true, sel=msb, out=ng);
+      // Not sure if these are "optimized"...probably not..Mux is a pretty complex chip..
 }
