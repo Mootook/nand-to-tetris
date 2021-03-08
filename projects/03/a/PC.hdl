@@ -16,5 +16,20 @@ CHIP PC {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    // Can be built from a register
+    // an incrementor, and some logic gates
+    
+    // Increment the "out" from the clock cycle
+    Inc16(in=rout, out=incout);
+
+    // Select between reset, load, inc
+    // if no inc, carry rout to next mux
+    Mux16(a=rout, b=incout, sel=inc, out=m0);
+    // if no load, carry rout again to next one
+    Mux16(a=m0, b=in, sel=load, out=m1);
+    // if no reset, carrout rout as final mux to register 
+    Mux16(a=m1, b=false, sel=reset, out=fout);
+    // load the final mux into register for next
+    // clock cycle
+    Register(in=fout, load=true, out=out, out=rout);
 }

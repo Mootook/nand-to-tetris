@@ -14,5 +14,11 @@ CHIP Bit {
     OUT out;
 
     PARTS:
+    // Can be built from DFF and a multiplexor
+    // DFF(in=, out=)
     // Put your code here:
+      // if in == 1, put load into out
+
+      Mux(a=o1, b=in, sel=load, out=mout);
+      DFF(in=mout, out=out, out=o1);
 }
