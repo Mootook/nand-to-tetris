@@ -14,5 +14,8 @@
 ![dest](./images/dest.png)
 ![jump](./images/jump.png)
 
+### Hack Character Set
+![hack-character-set](./images/hack-character-set.png)
+
 ### Extra Resources
 
