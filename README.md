@@ -17,5 +17,9 @@
 ### Hack Character Set
 ![hack-character-set](./images/hack-character-set.png)
 
+![hack-computer](./images/hack-computer.png)
+
+![hack-cpu](./images/hack-cpu.png)
+
 ### Extra Resources
 
