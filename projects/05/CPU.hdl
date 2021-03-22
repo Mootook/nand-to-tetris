@@ -39,15 +39,6 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // PARTS:
-    // ALU
-      // ALU(x= ,y= ,zx= ,nx= ,zy= ,ny= ,f= ,no= ,out= ,zr= ,ng= )
-    // 2 Registers
-      // Register(in= ,load= ,out= )
-    // ProgramCounter
-      // PC(in= ,load= ,inc= ,reset= ,out= )
-
-
     // instruction[15] is out op-code
     // instruction[12] is a in comp sequence
     
@@ -62,18 +53,64 @@ CHIP CPU {
     // does instruction pertain to A instruction
     Or(a=notop, b=instruction[5], out=ainstruction);
     // A Register
-    ARegister(in=m1out, load=ainstruction, out=aregister);
+    // output addressM as address in data memory (of M)
+    ARegister(in=m1out, load=ainstruction, out=aregister, out[0..14]=addressM);
 
     // M2
     // Multiplexor for inM and A Register
     // DO we use contents of A register or inM for ALU data
     // beginning of comp sequence, "a" bit.
     // out = "a or m"
-    Mux16(a=aregister, b=inM, sel=instruction[12], out=aorm); // Goes to ALU
+    And(a=instruction[15], b=instruction[12], out=am);
+    Mux16(a=aregister, b=inM, sel=am, out=aorm); // Goes to ALU
+    // Other Data to operatoe on comes from 
+    // D Register
+    // look at dest codes in language spec
+    And(a=instruction[15], b=instruction[4], out=loadd);
+    DRegister(in=aluout, load=loadd, out=dregister);
 
-    ALU(x=, y=aorm, zx=, nx=, zy=, ny=, f=, no=, out=, zr=, ng=);
-    // Thinking all of ALU's input are read from parsing
-    // instruction bit sequence
+    // The ALU operating on the "selected"  data
+    // use all of the "comp" bits for the alu
+    ALU(
+      x=dregister,
+      y=aorm,
+      zx=instruction[11],
+      nx=instruction[10],
+      zy=instruction[9],
+      ny=instruction[8],
+      f=instruction[7],
+      no=instruction[6],
+      out=aluout,
+      out=outM, // result of computation
+      zr=zr, // 1 if (out == 0)
+      ng=ng // 1 if (out < 0)
+    );
 
+    // Do we write to memory here
+    And(a=instruction[3], b=instruction[15], out=writeM);
 
+    // Program Counter here,
+    // reset can just be fed into resultant PC after we determine state
+    // of instruction
+    // jmp only occurs when first three bits != 000
+    //
+    // need to check greater than, less than, or equal to
+    
+    // Less than or equal to 0
+    And(a=instruction[1], b=zr, out=jeq); // JEQ (out == 0)
+    And(a=instruction[2], b=ng, out=jlt); // JLT (out < 0)
+
+    // Greater than 0
+    Or(a=ng, b=zr, out=lte); // out <= 0
+    Not(in=lte, out=gt); // out > 0
+
+    And(a=instruction[0], b=gt, out=jgt); // JGT (out > 0)
+
+    Or(a=jeq, b=jlt, out=jle); // JLE <= 0
+    Or(a=jle, b=jgt, out=jmp);
+    // jmp
+    // inc / load
+    And(a=instruction[15], b=jmp, out=loadpc);
+    Not(in=loadpc, out=inc);
+    PC(in=aregister, load=loadpc, inc=inc, reset=reset, out[0..14]=pc);
 }
