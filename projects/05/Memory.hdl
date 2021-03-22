@@ -27,5 +27,24 @@ CHIP Memory {
     OUT out[16];
 
     PARTS:
-    // Put your code here:
+    // Demultiplex the selection
+    // RAM16k
+    // Screen
+    // Keyboard
+    // we only select between screen and RAM here, 
+    // as screen handles input directly from user (simulated and assumed)
+    DMux(in=load, sel=address[14], a=ram, b=screen);
+    // DMux on the last bit of the address
+    // Put load into either ram or screen depedning on address
+    // it'll be false for the non-selected one
+    //
+    // Does the load pertain to RAM?
+    RAM16K(in=in, load=ram, address=address[0..13], out=ramout);
+
+    // should load the screen?
+    Screen(in=in,load=screen, address=address[0..12] ,out=screenout);
+    // mocked input on the kb
+    Keyboard(out=kbout);
+    // 16k ram, takes up two in mux as it is double screenout or kbout 
+    Mux4Way16(a=ramout, b=ramout, c=screenout, d=kbout, sel=address[13..14], out=out);
 }

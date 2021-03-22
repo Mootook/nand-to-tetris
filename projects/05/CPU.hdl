@@ -39,5 +39,41 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+    // PARTS:
+    // ALU
+      // ALU(x= ,y= ,zx= ,nx= ,zy= ,ny= ,f= ,no= ,out= ,zr= ,ng= )
+    // 2 Registers
+      // Register(in= ,load= ,out= )
+    // ProgramCounter
+      // PC(in= ,load= ,inc= ,reset= ,out= )
+
+
+    // instruction[15] is out op-code
+    // instruction[12] is a in comp sequence
+    
+    // A Instruction
+    // op-code = 0, if notop, a instruction
+    Not(in=instruction[15], out=notop);
+    // M1
+    // If it's an "a-instruction"
+    // put the instruction in the "A register"
+    Mux16(a=aluout, b=instruction, sel=notop, out=m1out);
+    // instruciton[5]
+    // does instruction pertain to A instruction
+    Or(a=notop, b=instruction[5], out=ainstruction);
+    // A Register
+    ARegister(in=m1out, load=ainstruction, out=aregister);
+
+    // M2
+    // Multiplexor for inM and A Register
+    // DO we use contents of A register or inM for ALU data
+    // beginning of comp sequence, "a" bit.
+    // out = "a or m"
+    Mux16(a=aregister, b=inM, sel=instruction[12], out=aorm); // Goes to ALU
+
+    ALU(x=, y=aorm, zx=, nx=, zy=, ny=, f=, no=, out=, zr=, ng=);
+    // Thinking all of ALU's input are read from parsing
+    // instruction bit sequence
+
+
 }
