@@ -2,13 +2,17 @@
   "name": "assembler",
   "version": "1.0.0",
   "description": "Project 06 for nand2tetris part1",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./src/index.js"
   },
   "keywords": [
     "nand2tetris"
   ],
   "author": "Mootook",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.1.0"
+  }
 }
