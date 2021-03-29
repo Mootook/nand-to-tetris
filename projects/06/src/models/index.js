@@ -1,3 +1,5 @@
 module.exports = {
-  Parser: require('./parser')
+  Parser: require('./parser'),
+  SymbolTable: require('./symbol-table'),
+  Translator: require('./translator')
 }
