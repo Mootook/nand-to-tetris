@@ -7,18 +7,19 @@
 const chalk = require('chalk')
 const fs = require('fs')
 const path = require('path')
-const readline = require('readline')
 const args = process.argv.slice(2)
 const log = console.log
 const { Parser, SymbolTable, Translator } = require('./models')
-// TEST
-const test_file = '../add/Add.asm'
-const file = path.join(__dirname, test_file)
 // read as text file
 const fileAs = 'utf8'
 
 
 const main = () => {
+  if (!args.length) {
+    log(chalk.redBright('Please provide a file to translate'))
+    process.exit(1)
+  }
+  const file = path.join(__dirname, `../${args[0]}`)
   const asmText = fs.readFileSync(file, fileAs)
   const st = new SymbolTable()
   // first parse into a manageable, cleaned-up list of instructions
@@ -38,21 +39,24 @@ const main = () => {
   let hackFile = ''
 
   // process and translate each line
-  withoutLabels.forEach((l, i) => {
+  withoutLabels.forEach(l => {
+    let instruction = l.trim()
     let hackLine = ''
-    log('line:', i, l)
     // A-instruction
-    if (parser.isAInstruction(l)) {
-      const symbolName = parser.symbolName(l)
+    if (parser.isAInstruction(instruction)) {
+      const symbolName = parser.symbolName(instruction)
       let symbolValue
       // first check is symbolName is decimcal constant
       if (parser.symbolIsNumber(symbolName)) {
         symbolValue = parseInt(symbolName)
       } else if (st.hasSymbol(symbolName)) {
-        console.log(`${symbolName} is in CACHE`)
+        // then see if we have it in cache
         symbolValue = st.valueForSymbol(symbolName)
       } else {
+        // finally assume its a new variable, label
+        // add to st
         symbolValue = n
+        log(chalk.yellow(`${symbolName} ${n}`))
         st.addSymbol({ [symbolName]: n })
         n++
       }
@@ -61,14 +65,19 @@ const main = () => {
       hackLine = translator.aInstructToBinary(symbolValue)
     } else {
       // feed entire line to c instruction translation
-      hackLine = translator.cInstructToBinary(l)
+      hackLine = translator.cInstructToBinary(instruction)
     }
     hackFile += `${hackLine}\n`
   })
-
-  log('HACKFILE:')
+  
+  // log and save the file
+  log(chalk.greenBright('HACK FILE GENERATED:'))
   log(hackFile)
-
+  const baseFileName = path.basename(file)
+  const nWithoutType = baseFileName.substring(0, baseFileName.indexOf('.asm'))
+  const destination = `${path.join(__dirname, '../dist')}/${nWithoutType}.hack`
+  log(chalk.greenBright('Ouput in: ', destination))
+  fs.writeFileSync(destination, hackFile);
   process.exit(0)
 }
 
